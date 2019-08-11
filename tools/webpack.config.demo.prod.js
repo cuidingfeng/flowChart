@@ -36,7 +36,7 @@ const externals = {
 const devtool = 'cheap-module-source-map';
 
 const output = {
-  path: path.resolve(__dirname, '..', 'demo/dist'),
+  path: path.resolve(__dirname, '..', '../flowChartBuild/public/dist'),
   filename: '[name].js',
   libraryTarget: 'umd',
 };

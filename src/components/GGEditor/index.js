@@ -5,6 +5,7 @@ import {
   EDITOR_REACT_EVENTS,
   EVENT_BEFORE_ADD_PAGE,
   EVENT_AFTER_ADD_PAGE,
+  GRAPH_OTHER_REACT_EVENTS
 } from '@common/constants';
 import { pick } from '@utils';
 import Global from '@common/Global';
@@ -49,12 +50,23 @@ class GGEditor extends React.Component {
     this.editor.on(EVENT_AFTER_ADD_PAGE, func);
   };
 
+  onAfterChange = (func) => {
+    const { currentPage: page } = this;
+    if (page) {
+      func({ page });
+      return;
+    }
+
+    this.editor.on(GRAPH_OTHER_REACT_EVENTS.afterchange, func);
+  };
+
   init() {
     this.editor = new Editor();
     this.ggEditor = {
       editor: this.editor,
       onBeforeAddPage: this.handleBeforeAddPage,
       onAfterAddPage: this.handleAfterAddPage,
+      onAfterChange: this.onAfterChange,
     };
     this.propsAPI = new PropsAPI(this.editor);
   }

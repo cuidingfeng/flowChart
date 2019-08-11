@@ -1,4 +1,5 @@
 import React from 'react';
+import {request} from 'antd';
 import { pick, merge } from '@utils';
 import {
   GRAPH_MOUSE_EVENTS,
@@ -47,7 +48,28 @@ class Page extends React.Component {
     return this.page.getGraph();
   }
 
-  initPage() {}
+  pullData() {
+    const searchStr = this.obj2String({
+      docid: 1002
+    });
+    fetch('//' + location.hostname + '/getflow?' + searchStr, {
+      method: 'GET',
+      headers: new Headers({
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      })
+    })
+    .then((res)=>{
+      return res.json()
+    })
+    .then((res)=>{
+      this.graph.read(JSON.parse(res.data));
+    })
+  }
+
+  initPage() {
+    
+  }
 
   readData() {
     const { data } = this.config;
@@ -67,9 +89,39 @@ class Page extends React.Component {
         container: this.pageId,
       },
     });
-
+    
     this.initPage();
     this.readData();
+    this.pullData();
+  }
+
+  obj2String(obj, arr = [], idx = 0) {
+    for (let item in obj) {
+      arr[idx++] = [item, obj[item]]
+    }
+    return new URLSearchParams(arr).toString()
+  }
+
+  getSaveData() {
+    const searchStr = this.obj2String({
+      userid: 10001,
+      docid: 1002,
+      data: JSON.stringify(this.graph.save())
+    });
+    fetch('//' + location.hostname + '/saveflow', {
+      method: 'POST',
+      headers: new Headers({
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }),
+      body: searchStr
+    })
+    .then((res)=>{
+      return res.text()
+    })
+    .then((res)=>{
+      console.log(res)
+    })
   }
 
   bindEvent() {
@@ -87,7 +139,11 @@ class Page extends React.Component {
     });
 
     GRAPH_OTHER_EVENTS.forEach((event) => {
-      addListener(this.graph, [event], this.props[GRAPH_OTHER_REACT_EVENTS[event]]);
+      let func = this.props[GRAPH_OTHER_REACT_EVENTS[event]];
+      if(event === 'afterchange'){
+        func = this.getSaveData.bind(this);
+      }
+      addListener(this.graph, [event], func);
     });
 
     PAGE_EVENTS.forEach((event) => {

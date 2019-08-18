@@ -10,6 +10,7 @@ import {
   PAGE_REACT_EVENTS,
 } from '@common/constants';
 
+
 class Page extends React.Component {
   page;
 
@@ -63,7 +64,14 @@ class Page extends React.Component {
       return res.json()
     })
     .then((res)=>{
-      this.graph.read(JSON.parse(res.data));
+      console.log("res: ",res);
+      if(res.code == "403"){
+        //this.props.history.push("/login");
+        window.location.hash = "/login";
+      }else{
+        this.graph.read(JSON.parse(res.data));
+      }
+      
     })
   }
 
